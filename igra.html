@@ -56,9 +56,14 @@
   }
   h1 {
     margin: 0 0 16px; font-size: 44px; font-weight: 700; letter-spacing: -0.02em;
-    background: linear-gradient(90deg, #fff, #ede9fe, #fbcfe8);
+    background: linear-gradient(90deg, #fff, #ede9fe, #fbcfe8, #fff);
+    background-size: 200% auto;
     -webkit-background-clip: text; background-clip: text; color: transparent;
-    animation: title-glow 3s ease-in-out infinite;
+    animation: title-shimmer 4s ease-in-out infinite, title-glow 3s ease-in-out infinite;
+  }
+  @keyframes title-shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
   }
   @keyframes title-glow {
     0%, 100% { filter: drop-shadow(0 0 20px rgba(168,85,247,0.3)); }
@@ -204,9 +209,34 @@
     to { opacity: 1; transform: scale(1) translateY(0); }
   }
   .badge {
-    display: inline-flex; border-radius: 9999px; padding: 4px 12px; margin-bottom: 16px;
+    display: inline-flex; align-items: center; gap: 8px; border-radius: 9999px; padding: 6px 14px; margin-bottom: 16px;
     font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+    animation: badge-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
+  @keyframes badge-pop {
+    0% { opacity: 0; transform: scale(0.5); }
+    70% { transform: scale(1.08); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .tagline { margin: 12px auto 0; max-width: 320px; font-size: 14px; color: rgba(255,255,255,0.45); }
+  .timer-ring-wrap { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+  .timer-ring { position: relative; width: 72px; height: 72px; flex-shrink: 0; }
+  .timer-ring svg { transform: rotate(-90deg); }
+  .timer-ring-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: ui-monospace, monospace; font-size: 13px; font-weight: 700; }
+  .timer-msg { font-size: 14px; font-weight: 500; line-height: 1.4; color: #fde68a; flex: 1; }
+  .timer-msg.expired { color: #fecaca; }
+  .promo-ticket { position: relative; }
+  .notch { position: absolute; top: 50%; width: 8px; height: 16px; background: #0f0a1a; transform: translateY(-50%); z-index: 2; }
+  .notch-l { left: 0; border-radius: 0 8px 8px 0; }
+  .notch-r { right: 0; border-radius: 8px 0 0 8px; }
+  #neuroBokeh, #vignette { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+  .neuro-blob { position: absolute; border-radius: 50%; opacity: 0.3; filter: blur(60px); animation: neuro-float 18s ease-in-out infinite; }
+  @keyframes neuro-float {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    33% { transform: translate(20px,-30px) scale(1.05); }
+    66% { transform: translate(-15px,20px) scale(0.95); }
+  }
+  #vignette { background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%); z-index: 1; }
   .result h2 { margin: 0 0 12px; font-size: 28px; font-weight: 700; }
   .result p { margin: 0 0 20px; font-size: 16px; line-height: 1.5; color: rgba(255,255,255,0.75); }
   .promo-label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.5); }
@@ -293,6 +323,8 @@
 </head>
 <body>
   <button class="sound-btn" id="soundBtn" title="Выключить звук" aria-label="Звук">🔊</button>
+  <div id="neuroBokeh"></div>
+  <div id="vignette"></div>
   <div id="sparkles"></div>
   <div id="winFlash" class="win-flash"></div>
   <div id="confetti"></div>
@@ -304,37 +336,60 @@
     <header>
       <p class="eyebrow">Нейрофотосессия</p>
       <h1>Колесо удачи</h1>
-      <p class="lead">Крутите колесо и получите подарок, скидку или бонус к вашей AI-фотосессии. Один клик — и ваш персональный приз уже ждёт.</p>
+      <p class="lead">Крутите колесо и получите подарок, скидку или бонус к вашей AI-фотосессии.</p>
+      <p class="tagline">📸 AI-образы для личного бренда за 24 часа</p>
     </header>
 
     <div class="stage">
       <div class="wheel-col">
         <div class="wheel-box" id="wheelBox">
           <div class="lights" id="lights"></div>
-          <div class="pointer" id="pointer"></div>
-          <div class="ring">
+          <div class="pointer-wrap" id="pointer">
+            <svg width="32" height="36" viewBox="0 0 32 36" style="filter:drop-shadow(0 4px 12px rgba(244,114,182,0.7))">
+              <defs><linearGradient id="pg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fbcfe8"/><stop offset="50%" stop-color="#f472b6"/><stop offset="100%" stop-color="#a855f7"/></linearGradient></defs>
+              <path d="M16 2 L28 30 Q16 24 4 30 Z" fill="url(#pg)" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+              <ellipse cx="16" cy="10" rx="4" ry="2" fill="rgba(255,255,255,0.45)"/>
+            </svg>
+            <div class="pointer-shadow"></div>
+          </div>
+          <div class="wheel-rim-3d">
             <div class="ring-inner">
+              <div class="light-rays"><div class="light-rays-inner" id="lightRays"></div></div>
               <div class="wheel" id="wheel">
                 <div class="highlight" id="highlight"></div>
-                <!-- подписи добавляются скриптом -->
+                <div class="golden" id="golden"></div>
               </div>
             </div>
           </div>
           <button class="center-btn" id="centerBtn" aria-label="Крутить колесо">GO</button>
         </div>
-        <button class="spin-btn" id="spinBtn">Крутить колесо</button>
+        <div class="spin-wrap">
+          <div class="spin-progress" id="spinProgress"></div>
+          <button class="spin-btn" id="spinBtn">Крутить колесо</button>
+        </div>
       </div>
 
+      <div class="result-sheet hidden" id="resultSheet">
       <div class="result hidden" id="resultCard">
-        <span class="badge" id="badge">Ваш приз</span>
+        <span class="badge" id="badge"><span id="badgeIcon"></span> Ваш приз</span>
         <h2 id="resTitle"></h2>
         <p id="resDesc"></p>
         <span class="promo-label">Ваш промокод</span>
-        <div class="promo-row">
+        <div class="promo-ticket promo-row">
+          <span class="notch notch-l"></span><span class="notch notch-r"></span>
           <div class="promo-code" id="promoCode"></div>
           <button class="copy-btn" id="copyBtn">Копировать</button>
         </div>
-        <div class="timer" id="timer"></div>
+        <div class="timer-ring-wrap">
+          <div class="timer-ring">
+            <svg width="72" height="72" viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="28" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="4"/>
+              <circle id="timerArc" cx="36" cy="36" r="28" fill="none" stroke="#fbbf24" stroke-width="4" stroke-linecap="round" stroke-dasharray="175.93" stroke-dashoffset="0"/>
+            </svg>
+            <span class="timer-ring-text" id="timerText">15:00</span>
+          </div>
+          <p class="timer-msg" id="timerMsg">Приз сгорит — успейте забрать до истечения таймера</p>
+        </div>
         <div class="actions actions-main">
           <button class="cta" id="ctaBtn"></button>
           <div class="actions-row">
@@ -345,6 +400,7 @@
           </div>
         </div>
       </div>
+      </div>
     </div>
   </div>
 
@@ -353,22 +409,22 @@
   "use strict";
 
   var PRIZES = [
-    { id:"discount", label:"Скидка 15%", title:"Скидка 15%",
+    { id:"discount", label:"Скидка 15%", title:"Скидка 15%", icon:"💎",
       description:"Получите скидку на первую нейрофотосессию и создайте образы, которые продают вас без слов.",
       cta:"Получить скидку", color:"#7c3aed", textColor:"#ffffff", codePrefix:"NEURO15" },
-    { id:"bonus", label:"Бонусный образ", title:"Бонусный образ",
+    { id:"bonus", label:"Бонусный образ", title:"Бонусный образ", icon:"✨",
       description:"Добавим один дополнительный AI-образ к вашей фотосессии.",
       cta:"Получить бонус", color:"#db2777", textColor:"#ffffff", codePrefix:"BONUS" },
-    { id:"gift", label:"Подарок", title:"Подарок",
+    { id:"gift", label:"Подарок", title:"Подарок", icon:"🎁",
       description:"Мини-гайд по подготовке к нейрофотосессии в подарок.",
       cta:"Забрать подарок", color:"#0891b2", textColor:"#ffffff", codePrefix:"GIFT" },
-    { id:"idea", label:"Идея образа", title:"Идея образа",
+    { id:"idea", label:"Идея образа", title:"Идея образа", icon:"💡",
       description:"Получите персональную идею образа для вашего бренда или соцсетей.",
       cta:"Получить идею", color:"#ca8a04", textColor:"#1a1030", codePrefix:"IDEA" },
-    { id:"special", label:"Спецпредложение", title:"Спецпредложение",
+    { id:"special", label:"Спецпредложение", title:"Спецпредложение", icon:"👑",
       description:"Пакет «Личный бренд» на особых условиях только сегодня.",
       cta:"Записаться на нейрофотосессию", color:"#059669", textColor:"#ffffff", codePrefix:"BRAND" },
-    { id:"material", label:"Полезный материал", title:"Полезный материал",
+    { id:"material", label:"Полезный материал", title:"Полезный материал", icon:"📋",
       description:"Чек-лист: как выбрать стиль для нейрофотосессии.",
       cta:"Скачать чек-лист", color:"#6366f1", textColor:"#ffffff", codePrefix:"CHECK" }
   ];
@@ -384,13 +440,24 @@
   var highlight = document.getElementById("highlight");
   var centerBtn = document.getElementById("centerBtn");
   var spinBtn = document.getElementById("spinBtn");
+  var resultSheet = document.getElementById("resultSheet");
   var resultCard = document.getElementById("resultCard");
+  var badgeIcon = document.getElementById("badgeIcon");
+  var golden = document.getElementById("golden");
+  var timerArc = document.getElementById("timerArc");
+  var timerText = document.getElementById("timerText");
+  var timerMsg = document.getElementById("timerMsg");
+  var spinProgress = document.getElementById("spinProgress");
+  var lightRays = document.getElementById("lightRays");
+  var neuroBokeh = document.getElementById("neuroBokeh");
+  var TIMER_CIRC = 175.93;
+  var currentPrizeColor = "#a855f7";
+  var confettiAccent = null;
   var badge = document.getElementById("badge");
   var resTitle = document.getElementById("resTitle");
   var resDesc = document.getElementById("resDesc");
   var promoCodeEl = document.getElementById("promoCode");
   var copyBtn = document.getElementById("copyBtn");
-  var timerEl = document.getElementById("timer");
   var ctaBtn = document.getElementById("ctaBtn");
   var againBtn = document.getElementById("againBtn");
   var shareBtn = document.getElementById("shareBtn");
@@ -413,6 +480,28 @@
     if (label.length <= 14) return [label];
     var parts = label.split(" ");
     return parts.length > 1 ? parts : [label];
+  }
+
+  function buildNeuroBokeh() {
+    for (var n = 0; n < 10; n++) {
+      var b = document.createElement("div");
+      b.className = "neuro-blob";
+      b.style.left = (10 + Math.random() * 80) + "%";
+      b.style.top = (10 + Math.random() * 80) + "%";
+      b.style.width = b.style.height = (80 + Math.random() * 120) + "px";
+      b.style.background = "radial-gradient(circle, hsla(" + ((n * 47) % 360) + ", 80%, 65%, 0.35), transparent 70%)";
+      b.style.animationDelay = (Math.random() * 8) + "s";
+      neuroBokeh.appendChild(b);
+    }
+  }
+
+  function buildLightRays() {
+    for (var r = 0; r < 8; r++) {
+      var ray = document.createElement("div");
+      ray.className = "ray";
+      ray.style.transform = "rotate(" + (r * 45) + "deg)";
+      lightRays.appendChild(ray);
+    }
   }
 
   function buildSparkles() {
@@ -459,7 +548,8 @@
     }
   }
 
-  function triggerWowWin() {
+  function triggerWowWin(color) {
+    winFlash.style.background = "radial-gradient(circle at 50% 40%, rgba(255,255,255,0.55) 0%, " + (color || "#a855f7") + "55 35%, transparent 70%)";
     winFlash.classList.add("on");
     setTimeout(function(){ winFlash.classList.remove("on"); }, 700);
     document.body.classList.add("wow-shake");
@@ -484,33 +574,47 @@
     svg.setAttribute("viewBox", "0 0 200 200");
     svg.setAttribute("aria-hidden", "true");
 
-    var cx = 100, cy = 100, radius = 62;
+    for (var d = 0; d < N; d++) {
+      var deg = d * SECTOR - 90;
+      var radD = (deg * Math.PI) / 180;
+      var line = document.createElementNS(svgNS, "line");
+      line.setAttribute("x1", "100"); line.setAttribute("y1", "100");
+      line.setAttribute("x2", String(100 + 99 * Math.cos(radD)));
+      line.setAttribute("y2", String(100 + 99 * Math.sin(radD)));
+      line.setAttribute("stroke", "rgba(255,255,255,0.35)");
+      line.setAttribute("stroke-width", "1.5");
+      svg.appendChild(line);
+    }
+
+    var cx = 100, cy = 100, iconR = 48, labelR = 68;
     for (var j = 0; j < N; j++) {
       var midDeg = j * SECTOR + SECTOR / 2 - 90;
       var rad = (midDeg * Math.PI) / 180;
-      var x = cx + radius * Math.cos(rad);
-      var y = cy + radius * Math.sin(rad);
+      var ix = cx + iconR * Math.cos(rad), iy = cy + iconR * Math.sin(rad);
+      var lx = cx + labelR * Math.cos(rad), ly = cy + labelR * Math.sin(rad);
       var textRotate = midDeg + 90;
       var lines = splitLabel(PRIZES[j].label);
 
+      var icon = document.createElementNS(svgNS, "text");
+      icon.setAttribute("x", String(ix)); icon.setAttribute("y", String(iy));
+      icon.setAttribute("text-anchor", "middle"); icon.setAttribute("dominant-baseline", "middle");
+      icon.setAttribute("font-size", "14"); icon.textContent = PRIZES[j].icon;
+      svg.appendChild(icon);
+
       var text = document.createElementNS(svgNS, "text");
-      text.setAttribute("x", String(x));
-      text.setAttribute("y", String(y));
+      text.setAttribute("x", String(lx)); text.setAttribute("y", String(ly));
       text.setAttribute("fill", PRIZES[j].textColor);
       text.setAttribute("text-anchor", "middle");
       text.setAttribute("dominant-baseline", "middle");
-      text.setAttribute("transform", "rotate(" + textRotate + " " + x + " " + y + ")");
-
-      if (lines.length === 1) {
-        text.textContent = lines[0];
-      } else {
-        for (var k = 0; k < lines.length; k++) {
-          var tspan = document.createElementNS(svgNS, "tspan");
-          tspan.setAttribute("x", String(x));
-          tspan.setAttribute("dy", k === 0 ? "-0.45em" : "1em");
-          tspan.textContent = lines[k];
-          text.appendChild(tspan);
-        }
+      text.setAttribute("font-size", "9"); text.setAttribute("font-weight", "700");
+      text.setAttribute("transform", "rotate(" + textRotate + " " + lx + " " + ly + ")");
+      if (lines.length === 1) text.textContent = lines[0];
+      else for (var k = 0; k < lines.length; k++) {
+        var tspan = document.createElementNS(svgNS, "tspan");
+        tspan.setAttribute("x", String(lx));
+        tspan.setAttribute("dy", k === 0 ? "-0.4em" : "1em");
+        tspan.textContent = lines[k];
+        text.appendChild(tspan);
       }
       svg.appendChild(text);
     }
@@ -519,7 +623,13 @@
 
   function highlightGradient(index) {
     var start = index*SECTOR, end = (index+1)*SECTOR;
-    return "conic-gradient(from -90deg, transparent 0deg " + start + "deg, rgba(255,255,255,0.45) "
+    return "conic-gradient(from -90deg, transparent 0deg " + start + "deg, rgba(255,255,255,0.5) "
+      + start + "deg " + end + "deg, transparent " + end + "deg 360deg)";
+  }
+
+  function goldenGradient(index) {
+    var start = index*SECTOR, end = (index+1)*SECTOR;
+    return "conic-gradient(from -90deg, transparent 0deg " + start + "deg, rgba(251,191,36,0.85) "
       + start + "deg " + end + "deg, transparent " + end + "deg 360deg)";
   }
 
@@ -632,10 +742,10 @@
   });
 
   // ----- Конфетти -----
-  var COLORS = ["#f472b6","#a855f7","#22d3ee","#facc15","#34d399","#818cf8"];
   function launchConfetti() {
     confettiBox.innerHTML = "";
-    for (var i = 0; i < 120; i++) {
+    var colors = confettiAccent ? [confettiAccent, confettiAccent, "#f472b6","#a855f7","#22d3ee","#facc15"] : ["#f472b6","#a855f7","#22d3ee","#facc15","#34d399","#818cf8"];
+    for (var i = 0; i < 140; i++) {
       var p = document.createElement("span");
       p.className = "confetti-piece";
       var size = 5 + Math.random()*9;
@@ -644,7 +754,7 @@
       p.style.width = size + "px";
       p.style.height = (round ? size : size*0.4) + "px";
       p.style.borderRadius = round ? "50%" : "2px";
-      p.style.background = COLORS[i % COLORS.length];
+      p.style.background = colors[i % colors.length];
       p.style.setProperty("--drift", ((Math.random()-0.5)*200) + "px");
       p.style.setProperty("--rotate", (Math.random()*720) + "deg");
       var dur = 2.2 + Math.random()*2, delay = Math.random()*0.6;
@@ -663,7 +773,7 @@
       b.style.width = size2 + "px";
       b.style.height = (round2 ? size2 : size2*0.4) + "px";
       b.style.borderRadius = round2 ? "50%" : "2px";
-      b.style.background = COLORS[j % COLORS.length];
+      b.style.background = colors[j % colors.length];
       b.style.setProperty("--bx", (Math.cos(angle)*dist) + "px");
       b.style.setProperty("--by", (Math.sin(angle)*dist) + "px");
       b.style.setProperty("--rotate", (Math.random()*540) + "deg");
@@ -688,13 +798,17 @@
       if (left === 0) clearInterval(timerInterval);
     }, 1000);
     function render() {
+      var progress = left / DEADLINE_SEC;
+      timerArc.setAttribute("stroke-dashoffset", String(TIMER_CIRC * (1 - progress)));
+      timerArc.setAttribute("stroke", left <= 0 ? "#ef4444" : currentPrizeColor);
+      timerText.textContent = fmt(left);
       if (left <= 0) {
-        timerEl.classList.add("expired");
-        timerEl.innerHTML = "Время вышло — крутите ещё раз, чтобы получить новый приз.";
+        timerMsg.classList.add("expired");
+        timerMsg.textContent = "Время вышло — крутите ещё раз, чтобы получить новый приз.";
         ctaBtn.disabled = true;
       } else {
-        timerEl.classList.remove("expired");
-        timerEl.innerHTML = "Приз сгорит через <b>" + fmt(left) + "</b>";
+        timerMsg.classList.remove("expired");
+        timerMsg.textContent = "Приз сгорит — успейте забрать до истечения таймера";
         ctaBtn.disabled = false;
       }
     }
@@ -702,18 +816,28 @@
 
   // ----- Показ результата -----
   function showResult(prize) {
+    currentPrizeColor = prize.color;
+    confettiAccent = prize.color;
     badge.style.background = prize.color;
-    resTitle.textContent = prize.title;
+    badgeIcon.textContent = prize.icon;
+    resTitle.textContent = prize.icon + " " + prize.title;
     resDesc.textContent = prize.description;
     promoCodeEl.textContent = genCode(prize.codePrefix);
+    promoCodeEl.style.border = "2px dashed " + prize.color + "88";
+    promoCodeEl.style.background = "linear-gradient(135deg, " + prize.color + "33, rgba(0,0,0,0.35))";
     ctaBtn.textContent = prize.cta;
+    ctaBtn.style.background = "linear-gradient(90deg, " + prize.color + ", #a855f7)";
+    ctaBtn.style.boxShadow = "0 8px 28px " + prize.color + "55";
     copyBtn.textContent = "Копировать";
+    resultCard.style.borderColor = prize.color + "99";
+    resultCard.style.boxShadow = "0 0 50px " + prize.color + "40, 0 24px 80px rgba(0,0,0,0.4)";
+    resultSheet.classList.remove("hidden");
     resultCard.classList.remove("hidden");
-    spinBtn.classList.add("hidden");
+    document.querySelector(".spin-wrap").classList.add("hidden");
     startTimer();
     launchConfetti();
     playWin();
-    triggerWowWin();
+    triggerWowWin(prize.color);
   }
 
   // ----- Вращение -----
@@ -725,9 +849,20 @@
     centerBtn.disabled = true;
     spinBtn.textContent = "Колесо крутится…";
     highlight.classList.remove("on");
+    golden.classList.remove("on");
     wheelBox.classList.add("spinning");
+    wheel.classList.add("spinning");
+    spinProgress.style.width = "0%";
     updateLightsSpinning(true);
     startTicks();
+    var spinStart = performance.now();
+    function tickProgress() {
+      if (!isSpinning) return;
+      var p = Math.min((performance.now() - spinStart) / SPIN_MS, 1) * 100;
+      spinProgress.style.width = p + "%";
+      if (p < 100) requestAnimationFrame(tickProgress);
+    }
+    requestAnimationFrame(tickProgress);
 
     var index = Math.floor(Math.random()*N);
     var target = rotationForSector(index);
@@ -744,9 +879,13 @@
       isSpinning = false;
       stopTicks();
       wheelBox.classList.remove("spinning");
+      wheel.classList.remove("spinning");
+      spinProgress.style.width = "100%";
       updateLightsSpinning(false);
       highlight.style.background = highlightGradient(index);
       highlight.classList.add("on");
+      golden.style.background = goldenGradient(index);
+      golden.classList.add("on");
       showResult(PRIZES[index]);
     }, SPIN_MS);
   }
@@ -754,9 +893,11 @@
   function reset() {
     if (isSpinning) return;
     if (timerInterval) clearInterval(timerInterval);
+    resultSheet.classList.add("hidden");
     resultCard.classList.add("hidden");
     highlight.classList.remove("on");
-    spinBtn.classList.remove("hidden");
+    golden.classList.remove("on");
+    document.querySelector(".spin-wrap").classList.remove("hidden");
     spinBtn.disabled = false;
     centerBtn.disabled = false;
     spinBtn.textContent = "Крутить колесо";
@@ -784,6 +925,8 @@
     alert("Приз: " + resTitle.textContent + "\nПромокод: " + promoCodeEl.textContent);
   });
 
+  buildNeuroBokeh();
+  buildLightRays();
   buildSparkles();
   buildLights();
   buildWheel();
