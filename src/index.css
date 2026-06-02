@@ -2,6 +2,23 @@
 
 @theme {
   --font-sans: "Manrope", system-ui, sans-serif;
+
+  --animate-sparkle: sparkle 4s ease-in-out infinite;
+  --animate-neuro-float: neuro-float 18s ease-in-out infinite;
+  --animate-bulb-idle: bulb-idle 1.8s ease-in-out infinite;
+  --animate-bulb-chase: bulb-chase 0.35s linear infinite;
+  --animate-win-flash: win-flash 0.7s ease-out forwards;
+  --animate-pointer-bounce: pointer-bounce 0.55s ease;
+  --animate-shake: shake 0.5s ease;
+  --animate-wow-pop: wow-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  --animate-badge-pop: badge-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  --animate-shimmer: shimmer 2.5s ease-in-out infinite;
+  --animate-title-glow: title-glow 3s ease-in-out infinite;
+  --animate-title-shimmer: title-shimmer 4s ease-in-out infinite;
+  --animate-confetti-burst: confetti-burst 1.8s ease-out forwards;
+  --animate-confetti-fall: confetti-fall 3s linear forwards;
+  --animate-aura-pulse: aura-pulse 0.45s ease-in-out infinite alternate;
+  --animate-spin-slow: spin 1.2s linear infinite;
 }
 
 body {
@@ -9,4 +26,144 @@ body {
   min-height: 100vh;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  background: linear-gradient(135deg, #0f0a1a 0%, #1a1030 50%, #0d1528 100%);
+  background-size: 200% 200%;
+  animation: aurora 12s ease infinite;
+}
+
+body.wow-shake {
+  animation: shake 0.5s ease, aurora 12s ease infinite;
+}
+
+.wheel-rim-3d {
+  background: linear-gradient(
+    145deg,
+    #fde68a 0%,
+    #f472b6 25%,
+    #a855f7 50%,
+    #f472b6 75%,
+    #fde68a 100%
+  );
+  box-shadow:
+    inset 0 2px 6px rgba(255, 255, 255, 0.45),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.35),
+    0 0 50px rgba(168, 85, 247, 0.35);
+}
+
+.glass-spin-btn {
+  box-shadow:
+    0 8px 32px rgba(168, 85, 247, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.result-sheet {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+@media (min-width: 1024px) {
+  .result-sheet {
+    padding-bottom: 0;
+  }
+}
+
+@keyframes aurora {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes neuro-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(20px, -30px) scale(1.05); }
+  66% { transform: translate(-15px, 20px) scale(0.95); }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0.15; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+@keyframes bulb-idle {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
+@keyframes bulb-chase {
+  0%, 100% { opacity: 0.25; transform: scale(0.7); }
+  50% { opacity: 1; transform: scale(1.25); }
+}
+
+@keyframes win-flash {
+  0% { opacity: 0.95; }
+  100% { opacity: 0; }
+}
+
+@keyframes pointer-bounce {
+  0%, 100% { transform: translate(-50%, 0); }
+  35% { transform: translate(-50%, 10px); }
+  65% { transform: translate(-50%, -6px); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+@keyframes wow-pop {
+  0% { opacity: 0; transform: scale(0.85) translateY(20px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes badge-pop {
+  0% { opacity: 0; transform: scale(0.5); }
+  70% { transform: scale(1.08); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(220%); }
+}
+
+@keyframes title-glow {
+  0%, 100% { filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.3)); }
+  50% { filter: drop-shadow(0 0 36px rgba(244, 114, 182, 0.5)); }
+}
+
+@keyframes title-shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.animate-title-shimmer {
+  background-size: 200% auto;
+  animation: title-shimmer 4s ease-in-out infinite, title-glow 3s ease-in-out infinite;
+}
+
+@keyframes aura-pulse {
+  0% {
+    box-shadow:
+      inset 0 2px 6px rgba(255, 255, 255, 0.45),
+      inset 0 -3px 8px rgba(0, 0, 0, 0.35),
+      0 0 50px rgba(168, 85, 247, 0.35);
+  }
+  100% {
+    box-shadow:
+      inset 0 2px 6px rgba(255, 255, 255, 0.45),
+      inset 0 -3px 8px rgba(0, 0, 0, 0.35),
+      0 0 90px rgba(168, 85, 247, 0.65),
+      0 0 120px rgba(244, 114, 182, 0.3);
+  }
+}
+
+@keyframes confetti-fall {
+  0% { transform: translate(0, -10%) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--drift), 105vh) rotate(var(--rotate)); opacity: 0; }
+}
+
+@keyframes confetti-burst {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+  100% { transform: translate(var(--bx), var(--by)) rotate(var(--rotate)) scale(0.3); opacity: 0; }
 }

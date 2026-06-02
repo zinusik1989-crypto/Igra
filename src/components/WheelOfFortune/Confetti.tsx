@@ -1,62 +1,87 @@
 import { useMemo } from "react";
 
 type ConfettiProps = {
-  /** Меняйте ключ (например, на счётчик прокруток), чтобы перезапустить анимацию */
   seed: number;
-  count?: number;
+  accentColor?: string;
 };
 
-const COLORS = ["#f472b6", "#a855f7", "#22d3ee", "#facc15", "#34d399", "#818cf8"];
+const DEFAULT_COLORS = ["#f472b6", "#a855f7", "#22d3ee", "#facc15", "#34d399", "#818cf8"];
 
-export function Confetti({ seed, count = 80 }: ConfettiProps) {
-  const pieces = useMemo(() => {
-    return Array.from({ length: count }, (_, i) => {
-      const left = Math.random() * 100;
-      const delay = Math.random() * 0.5;
-      const duration = 2.4 + Math.random() * 1.8;
-      const size = 6 + Math.random() * 8;
-      const color = COLORS[i % COLORS.length];
-      const drift = (Math.random() - 0.5) * 160;
-      const rotate = Math.random() * 360;
-      return { id: i, left, delay, duration, size, color, drift, rotate };
+function mixColors(accent: string): string[] {
+  return [accent, accent, ...DEFAULT_COLORS];
+}
+
+export function Confetti({ seed, accentColor }: ConfettiProps) {
+  const colors = accentColor ? mixColors(accentColor) : DEFAULT_COLORS;
+
+  const { fall, burst } = useMemo(() => {
+    const fallPieces = Array.from({ length: 140 }, (_, i) => ({
+      id: `f-${i}`,
+      left: Math.random() * 100,
+      delay: Math.random() * 0.6,
+      duration: 2.2 + Math.random() * 2,
+      size: 5 + Math.random() * 9,
+      color: colors[i % colors.length],
+      drift: (Math.random() - 0.5) * 220,
+      rotate: Math.random() * 720,
+      round: Math.random() > 0.45,
+    }));
+
+    const burstPieces = Array.from({ length: 60 }, (_, i) => {
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 80 + Math.random() * 260;
+      return {
+        id: `b-${i}`,
+        left: 50,
+        top: 42,
+        bx: Math.cos(angle) * dist + "px",
+        by: Math.sin(angle) * dist + "px",
+        delay: Math.random() * 0.15,
+        size: 4 + Math.random() * 10,
+        color: colors[i % colors.length],
+        rotate: Math.random() * 540,
+        round: Math.random() > 0.35,
+      };
     });
-    // seed форсирует пересоздание набора при новой прокрутке
+
+    return { fall: fallPieces, burst: burstPieces };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seed, count]);
+  }, [seed, accentColor]);
 
   return (
-    <div
-      className="pointer-events-none absolute inset-0 z-40 overflow-hidden"
-      aria-hidden
-    >
-      {pieces.map((p) => (
+    <div className="pointer-events-none fixed inset-0 z-40 overflow-hidden" aria-hidden>
+      {fall.map((p) => (
         <span
           key={p.id}
-          className="absolute top-0 block rounded-[2px]"
+          className={`absolute top-0 block ${p.round ? "rounded-full" : "rounded-[2px]"}`}
           style={{
             left: `${p.left}%`,
-            width: `${p.size}px`,
-            height: `${p.size * 0.4}px`,
+            width: p.size,
+            height: p.round ? p.size : p.size * 0.4,
             backgroundColor: p.color,
             animation: `confetti-fall ${p.duration}s linear ${p.delay}s forwards`,
-            // CSS-переменные для keyframes
             ["--drift" as string]: `${p.drift}px`,
             ["--rotate" as string]: `${p.rotate}deg`,
           }}
         />
       ))}
-      <style>{`
-        @keyframes confetti-fall {
-          0% {
-            transform: translate(0, -10%) rotate(0deg);
-            opacity: 1;
-          }
-          100% {
-            transform: translate(var(--drift), 105vh) rotate(var(--rotate));
-            opacity: 0;
-          }
-        }
-      `}</style>
+      {burst.map((p) => (
+        <span
+          key={p.id}
+          className={`absolute block ${p.round ? "rounded-full" : "rounded-[2px]"}`}
+          style={{
+            left: `${p.left}%`,
+            top: `${p.top}%`,
+            width: p.size,
+            height: p.round ? p.size : p.size * 0.4,
+            backgroundColor: p.color,
+            animation: `confetti-burst 1.8s ease-out ${p.delay}s forwards`,
+            ["--bx" as string]: p.bx,
+            ["--by" as string]: p.by,
+            ["--rotate" as string]: `${p.rotate}deg`,
+          }}
+        />
+      ))}
     </div>
   );
 }

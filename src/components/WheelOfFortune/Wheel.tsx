@@ -1,4 +1,8 @@
 import { PRIZES, SECTOR_ANGLE } from "./prizes";
+import { WheelLabels } from "./WheelLabels";
+import { WheelDividers } from "./WheelDividers";
+import { WheelLights } from "./WheelLights";
+import { SpinLightRays } from "./SpinLightRays";
 
 type WheelProps = {
   rotation: number;
@@ -17,11 +21,16 @@ function buildConicGradient(): string {
   return `conic-gradient(from -90deg, ${stops.join(", ")})`;
 }
 
-/** Полупрозрачная белая «подсветка» только на выпавшем секторе */
 function buildHighlightGradient(index: number): string {
   const start = index * SECTOR_ANGLE;
   const end = (index + 1) * SECTOR_ANGLE;
-  return `conic-gradient(from -90deg, transparent 0deg ${start}deg, rgba(255,255,255,0.45) ${start}deg ${end}deg, transparent ${end}deg 360deg)`;
+  return `conic-gradient(from -90deg, transparent 0deg ${start}deg, rgba(255,255,255,0.5) ${start}deg ${end}deg, transparent ${end}deg 360deg)`;
+}
+
+function buildGoldenRing(index: number): string {
+  const start = index * SECTOR_ANGLE;
+  const end = (index + 1) * SECTOR_ANGLE;
+  return `conic-gradient(from -90deg, transparent 0deg ${start}deg, rgba(251,191,36,0.85) ${start}deg ${end}deg, transparent ${end}deg 360deg)`;
 }
 
 export function Wheel({
@@ -35,78 +44,118 @@ export function Wheel({
   const transitionTiming = isSpinning
     ? "cubic-bezier(0.17, 0.67, 0.12, 0.99)"
     : "ease";
+  const pointerBounce = winningIndex !== null && !isSpinning;
 
   return (
-    <div className="relative mx-auto aspect-square w-full max-w-[min(100%,380px)]">
-      {/* Указатель */}
+    <div className="relative mx-auto aspect-square w-[85vw] max-w-[min(100%,420px)] sm:w-full">
+      <WheelLights isSpinning={isSpinning} />
+      <SpinLightRays active={isSpinning} />
+
+      {/* Премиум-указатель */}
       <div
-        className="absolute left-1/2 top-0 z-20 -translate-x-1/2 -translate-y-1"
+        className={`absolute left-1/2 top-0 z-20 -translate-x-1/2 ${
+          pointerBounce ? "animate-pointer-bounce" : ""
+        }`}
         aria-hidden
       >
-        <div className="h-0 w-0 border-x-[14px] border-b-[22px] border-x-transparent border-b-[#f472b6] drop-shadow-[0_2px_8px_rgba(244,114,182,0.6)]" />
+        <svg width={32} height={36} viewBox="0 0 32 36" className="drop-shadow-[0_4px_12px_rgba(244,114,182,0.7)]">
+          <defs>
+            <linearGradient id="ptrGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#fbcfe8" />
+              <stop offset="50%" stopColor="#f472b6" />
+              <stop offset="100%" stopColor="#a855f7" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M16 2 L28 30 Q16 24 4 30 Z"
+            fill="url(#ptrGrad)"
+            stroke="rgba(255,255,255,0.5)"
+            strokeWidth={1}
+          />
+          <ellipse cx={16} cy={10} rx={4} ry={2} fill="rgba(255,255,255,0.45)" />
+        </svg>
+        <div className="mx-auto mt-0.5 h-2 w-6 rounded-full bg-black/30 blur-sm" />
       </div>
 
-      {/* Внешнее кольцо */}
-      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 via-white/5 to-transparent p-[3px] shadow-[0_0_60px_rgba(168,85,247,0.25)]">
-        <div className="h-full w-full rounded-full bg-[#1a1030]/80 p-2">
-          {/* Колесо */}
+      {/* Металлический 3D-обод */}
+      <div
+        className={`wheel-rim-3d absolute inset-0 rounded-full p-[5px] ${
+          isSpinning ? "animate-aura-pulse" : ""
+        }`}
+      >
+        <div className="h-full w-full rounded-full bg-[#1a1030]/90 p-2 shadow-[inset_0_4px_12px_rgba(0,0,0,0.5)]">
           <div
-            className="relative h-full w-full rounded-full shadow-inner"
+            className={`relative h-full w-full rounded-full shadow-[inset_0_2px_8px_rgba(255,255,255,0.12),inset_0_-4px_12px_rgba(0,0,0,0.35)] transition-[filter] duration-300 ${
+              isSpinning ? "blur-[2px] brightness-110" : ""
+            }`}
             style={{
               background: buildConicGradient(),
               transform: `rotate(${rotation}deg)`,
               transition: `transform ${transitionDuration} ${transitionTiming}`,
             }}
           >
-            {/* Подсветка выпавшего сектора */}
             {winningIndex !== null && !isSpinning && (
-              <div
-                className="pointer-events-none absolute inset-0 animate-[pulse_1.1s_ease-in-out_infinite] rounded-full"
-                style={{ background: buildHighlightGradient(winningIndex) }}
-                aria-hidden
-              />
+              <>
+                <div
+                  className="pointer-events-none absolute inset-0 animate-[pulse_1.1s_ease-in-out_infinite] rounded-full"
+                  style={{ background: buildHighlightGradient(winningIndex) }}
+                />
+                <div
+                  className="pointer-events-none absolute inset-0 animate-[pulse_1.1s_ease-in-out_infinite] rounded-full"
+                  style={{ background: buildGoldenRing(winningIndex) }}
+                />
+              </>
             )}
 
-            {/* Подписи секторов */}
-            {PRIZES.map((prize, index) => {
-              const angle = index * SECTOR_ANGLE + SECTOR_ANGLE / 2 - 90;
-              return (
-                <div
-                  key={prize.id}
-                  className="pointer-events-none absolute left-1/2 top-1/2 origin-center"
-                  style={{
-                    transform: `rotate(${angle}deg) translateY(-38%)`,
-                    width: "42%",
-                    marginLeft: "-21%",
-                  }}
-                >
-                  <span
-                    className="block text-center text-[10px] font-semibold leading-tight sm:text-xs"
-                    style={{
-                      color: prize.textColor,
-                      textShadow: "0 1px 3px rgba(0,0,0,0.35)",
-                      transform: `rotate(${-angle + 90}deg)`,
-                    }}
-                  >
-                    {prize.label}
-                  </span>
-                </div>
-              );
-            })}
+            <WheelDividers />
+            <WheelLabels />
           </div>
         </div>
       </div>
 
-      {/* Центральная кнопка */}
-      <button
-        type="button"
-        onClick={onSpin}
-        disabled={disabled}
-        className="absolute left-1/2 top-1/2 z-30 flex h-[22%] w-[22%] min-h-[56px] min-w-[56px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-gradient-to-br from-[#f472b6] to-[#a855f7] text-[10px] font-bold uppercase tracking-wide text-white shadow-[0_4px_24px_rgba(168,85,247,0.5)] transition hover:scale-105 hover:shadow-[0_6px_32px_rgba(168,85,247,0.6)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 sm:text-xs"
-        aria-label="Крутить колесо"
-      >
-        {disabled ? "…" : "GO"}
-      </button>
+      {/* Кольцо прогресса при вращении */}
+      {isSpinning && (
+        <svg
+          className="pointer-events-none absolute inset-0 z-[25] h-full w-full -rotate-90 animate-spin-slow"
+          viewBox="0 0 100 100"
+          aria-hidden
+        >
+          <circle
+            cx={50}
+            cy={50}
+            r={46}
+            fill="none"
+            stroke="url(#spinGrad)"
+            strokeWidth={2}
+            strokeDasharray="40 240"
+            strokeLinecap="round"
+          />
+          <defs>
+            <linearGradient id="spinGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#f472b6" />
+              <stop offset="100%" stopColor="#a855f7" />
+            </linearGradient>
+          </defs>
+        </svg>
+      )}
+
+      {/* GO + зарядка */}
+      <div className="absolute left-1/2 top-1/2 z-30 -translate-x-1/2 -translate-y-1/2">
+        {!disabled && !isSpinning && (
+          <div className="absolute inset-0 -m-3 animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite] rounded-full border border-pink-400/30" />
+        )}
+        <button
+          type="button"
+          onClick={onSpin}
+          disabled={disabled}
+          className={`relative flex h-[22%] min-h-[56px] w-[22%] min-w-[56px] items-center justify-center rounded-full bg-gradient-to-br from-[#f472b6] to-[#a855f7] text-[10px] font-bold uppercase tracking-wide text-white shadow-[0_4px_24px_rgba(168,85,247,0.5),inset_0_2px_4px_rgba(255,255,255,0.25)] transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60 sm:text-xs ${
+            isSpinning ? "animate-pulse" : ""
+          }`}
+          aria-label="Крутить колесо"
+        >
+          {disabled ? "…" : "GO"}
+        </button>
+      </div>
     </div>
   );
 }

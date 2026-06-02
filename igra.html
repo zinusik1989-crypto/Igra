@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Колесо удачи — нейрофотосессия</title>
+<style>
+  :root {
+    --pink: #f472b6;
+    --purple: #a855f7;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    font-family: "Manrope", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    color: #fff;
+    background: linear-gradient(135deg, #0f0a1a 0%, #1a1030 50%, #0d1528 100%);
+    background-size: 200% 200%;
+    animation: aurora 12s ease infinite;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  body.wow-shake { animation: shake 0.5s ease, aurora 12s ease infinite; }
+  @keyframes aurora {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+  .wrap {
+    position: relative;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 48px 16px 64px;
+  }
+  .glow1, .glow2 { position: absolute; border-radius: 9999px; pointer-events: none; z-index: 0; }
+  .glow1 {
+    left: 50%; top: 33%; width: 500px; height: 500px;
+    transform: translate(-50%, -50%);
+    background: rgba(168,85,247,0.2); filter: blur(120px);
+  }
+  .glow2 {
+    right: 0; top: 0; width: 256px; height: 256px;
+    background: rgba(236,72,153,0.15); filter: blur(80px);
+  }
+  header { text-align: center; margin-bottom: 44px; position: relative; z-index: 2; }
+  .eyebrow {
+    margin: 0 0 8px; font-size: 14px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.2em; color: rgba(244,114,182,0.9);
+  }
+  h1 {
+    margin: 0 0 16px; font-size: 44px; font-weight: 700; letter-spacing: -0.02em;
+    background: linear-gradient(90deg, #fff, #ede9fe, #fbcfe8);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: title-glow 3s ease-in-out infinite;
+  }
+  @keyframes title-glow {
+    0%, 100% { filter: drop-shadow(0 0 20px rgba(168,85,247,0.3)); }
+    50% { filter: drop-shadow(0 0 36px rgba(244,114,182,0.55)); }
+  }
+  .lead { margin: 0 auto; max-width: 560px; font-size: 18px; color: rgba(255,255,255,0.6); }
+
+  .stage {
+    display: flex; flex-direction: column; align-items: center; gap: 40px;
+    position: relative; z-index: 2;
+  }
+  @media (min-width: 1024px) {
+    .stage { flex-direction: row; align-items: flex-start; justify-content: center; gap: 56px; }
+    h1 { font-size: 52px; }
+  }
+
+  .wheel-col { width: 85vw; max-width: 420px; flex-shrink: 0; }
+  .wheel-box { position: relative; margin: 0 auto; width: 100%; aspect-ratio: 1 / 1; }
+  .wheel-rim-3d {
+    position: absolute; inset: 0; border-radius: 9999px; padding: 5px;
+    background: linear-gradient(145deg, #fde68a, #f472b6, #a855f7, #f472b6, #fde68a);
+    box-shadow: inset 0 2px 6px rgba(255,255,255,0.45), inset 0 -3px 8px rgba(0,0,0,0.35), 0 0 50px rgba(168,85,247,0.35);
+  }
+  .wheel-box.spinning .wheel-rim-3d { animation: aura-pulse 0.45s ease-in-out infinite alternate; }
+  @keyframes aura-pulse {
+    0% { box-shadow: 0 0 50px rgba(168,85,247,0.35), 0 0 80px rgba(244,114,182,0.15); }
+    100% { box-shadow: 0 0 90px rgba(168,85,247,0.65), 0 0 140px rgba(244,114,182,0.35); }
+  }
+
+  .lights { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
+  .bulb {
+    position: absolute; width: 7px; height: 7px; border-radius: 50%;
+    margin-left: -3.5px; margin-top: -3.5px;
+    background: rgba(255,255,255,0.85);
+    box-shadow: 0 0 6px rgba(255,255,255,0.6);
+    animation: bulb-idle 1.8s ease-in-out infinite;
+  }
+  .wheel-box.spinning .bulb {
+    animation: bulb-chase 0.35s linear infinite;
+  }
+  @keyframes bulb-idle {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+  }
+  @keyframes bulb-chase {
+    0%, 100% { opacity: 0.25; transform: scale(0.7); }
+    50% { opacity: 1; transform: scale(1.25); }
+  }
+
+  .pointer-wrap { position: absolute; left: 50%; top: 0; z-index: 20; transform: translateX(-50%); text-align: center; }
+  .pointer-wrap.bounce { animation: pointer-bounce 0.55s ease; }
+  @keyframes pointer-bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    35% { transform: translateX(-50%) translateY(10px); }
+    65% { transform: translateX(-50%) translateY(-6px); }
+  }
+  .pointer-shadow { width: 24px; height: 8px; margin: 2px auto 0; border-radius: 50%; background: rgba(0,0,0,0.35); filter: blur(3px); }
+  .ring-inner { width: 100%; height: 100%; border-radius: 9999px; background: rgba(26,16,48,0.9); padding: 8px; box-shadow: inset 0 4px 12px rgba(0,0,0,0.5); }
+  .wheel {
+    position: relative; width: 100%; height: 100%; border-radius: 9999px;
+    box-shadow: inset 0 2px 8px rgba(255,255,255,0.12), inset 0 -4px 12px rgba(0,0,0,0.35);
+    transition: transform 0s ease, filter 0.3s;
+  }
+  .wheel-box.spinning .wheel { filter: blur(2px) brightness(1.1); transition: transform 4.5s cubic-bezier(0.17, 0.67, 0.12, 0.99), filter 0.3s; }
+  .wheel.spinning { transition: transform 4.5s cubic-bezier(0.17, 0.67, 0.12, 0.99); }
+  .light-rays { position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
+  .wheel-box.spinning .light-rays { opacity: 1; }
+  .light-rays-inner { position: relative; width: 100%; height: 100%; animation: spin-rays 3s linear infinite; }
+  .ray { position: absolute; left: 50%; top: 50%; width: 3px; height: 50%; margin-left: -1.5px; transform-origin: 50% 100%; background: linear-gradient(to top, transparent, rgba(255,255,255,0.25)); border-radius: 2px; }
+  @keyframes spin-rays { to { transform: rotate(360deg); } }
+  .golden { position: absolute; inset: 0; border-radius: 9999px; pointer-events: none; opacity: 0; }
+  .golden.on { opacity: 1; animation: pulse 1.1s ease-in-out infinite; }
+
+  .highlight {
+    position: absolute; inset: 0; border-radius: 9999px; pointer-events: none;
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .highlight.on { opacity: 1; animation: pulse 1.1s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.45;} }
+
+  .wheel-labels {
+    position: absolute; inset: 0; z-index: 2;
+    width: 100%; height: 100%; pointer-events: none;
+  }
+  .wheel-labels text {
+    font-family: "Manrope", system-ui, sans-serif;
+    font-size: 9px; font-weight: 700;
+    paint-order: stroke fill;
+    stroke: rgba(0,0,0,0.45); stroke-width: 0.6px;
+  }
+
+  .center-btn {
+    position: absolute; left: 50%; top: 50%; z-index: 30;
+    width: 22%; height: 22%; min-width: 56px; min-height: 56px;
+    transform: translate(-50%, -50%);
+    border: none; border-radius: 9999px; cursor: pointer;
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    color: #fff; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    box-shadow: 0 4px 24px rgba(168,85,247,0.5);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .center-btn:hover:not(:disabled) { transform: translate(-50%, -50%) scale(1.05); }
+  .center-btn:disabled { cursor: not-allowed; opacity: 0.6; }
+  .wheel-box.spinning .center-btn { animation: pulse 0.6s ease-in-out infinite; }
+
+  .spin-wrap { position: relative; margin-top: 32px; }
+  .spin-progress { position: absolute; top: -4px; left: 0; height: 3px; border-radius: 4px; background: linear-gradient(90deg, var(--pink), var(--purple)); width: 0; transition: width 0.1s; }
+  .spin-btn {
+    position: relative; overflow: hidden;
+    width: 100%; padding: 16px 32px; border: 1px solid rgba(255,255,255,0.2); border-radius: 16px;
+    background: rgba(255,255,255,0.1); backdrop-filter: blur(12px);
+    color: #fff; font-size: 16px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 8px 32px rgba(168,85,247,0.25), inset 0 1px 0 rgba(255,255,255,0.15); transition: transform 0.15s, background 0.15s;
+  }
+  .spin-btn:hover:not(:disabled) { transform: translateY(-2px); background: rgba(255,255,255,0.15); }
+  .spin-btn::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.35) 50%, transparent 60%);
+    transform: translateX(-120%);
+    animation: shimmer 2.5s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0% { transform: translateX(-120%); }
+    100% { transform: translateX(220%); }
+  }
+  .spin-btn:hover:not(:disabled) { filter: brightness(1.1); }
+  .spin-btn:disabled { cursor: not-allowed; opacity: 0.5; }
+
+  .result-sheet { width: 100%; max-width: 448px; }
+  @media (max-width: 1023px) {
+    .result-sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; max-height: 85vh; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom, 16px); }
+  }
+  @media (min-width:1024px){ .result-sheet{ margin-top: 32px; } }
+  .result {
+    width: 100%; border-radius: 24px 24px 0 0; padding: 28px; border: 2px solid;
+    background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05));
+    backdrop-filter: blur(16px);
+    animation: wow-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @media (min-width:1024px){ .result{ border-radius: 24px; } }
+  @keyframes wow-pop {
+    from { opacity: 0; transform: scale(0.85) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .badge {
+    display: inline-flex; border-radius: 9999px; padding: 4px 12px; margin-bottom: 16px;
+    font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .result h2 { margin: 0 0 12px; font-size: 28px; font-weight: 700; }
+  .result p { margin: 0 0 20px; font-size: 16px; line-height: 1.5; color: rgba(255,255,255,0.75); }
+  .promo-label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.5); }
+  .promo-row { display: flex; gap: 8px; align-items: stretch; margin-bottom: 16px; }
+  .promo-code {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    border: 1px dashed rgba(255,255,255,0.25); border-radius: 12px; background: rgba(0,0,0,0.2);
+    padding: 12px 16px; font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 18px; font-weight: 700; letter-spacing: 0.15em;
+  }
+  .copy-btn {
+    flex-shrink: 0; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;
+    background: rgba(255,255,255,0.1); color: #fff; padding: 0 16px; font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .copy-btn:hover { background: rgba(255,255,255,0.2); }
+  .timer {
+    display: flex; align-items: center; gap: 8px; border-radius: 12px; padding: 12px 16px;
+    margin-bottom: 24px; font-size: 14px; font-weight: 500;
+    background: rgba(251,191,36,0.1); color: #fde68a;
+  }
+  .timer.expired { background: rgba(239,68,68,0.15); color: #fecaca; }
+  .timer b { font-family: ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+  .actions { display: flex; flex-direction: column; gap: 12px; }
+  @media (min-width:480px){ .actions{ flex-direction: row; flex-wrap: wrap; } }
+  .cta {
+    flex: 1; border: none; border-radius: 16px; padding: 14px 24px; cursor: pointer;
+    background: linear-gradient(90deg, var(--pink), var(--purple)); color: #fff;
+    font-size: 14px; font-weight: 600; box-shadow: 0 8px 24px rgba(168,85,247,0.3); transition: filter 0.15s;
+  }
+  .cta:hover:not(:disabled){ filter: brightness(1.1); }
+  .cta:disabled{ cursor: not-allowed; opacity: 0.5; }
+  .again, .share-btn {
+    flex: 1; border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 14px 24px; cursor: pointer;
+    background: rgba(255,255,255,0.05); color: #fff; font-size: 14px; font-weight: 600; transition: background 0.15s;
+  }
+  .again:hover, .share-btn:hover { background: rgba(255,255,255,0.1); }
+  .share-btn { display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .actions-main { display: flex; flex-direction: column; gap: 12px; }
+  .actions-row { display: flex; flex-direction: column; gap: 12px; }
+  @media (min-width:480px){ .actions-row{ flex-direction: row; } }
+  .hidden { display: none !important; }
+
+  .sound-btn {
+    position: absolute; right: 16px; top: 16px; z-index: 50;
+    width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,0.15); border-radius: 9999px;
+    background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); font-size: 18px; cursor: pointer;
+    backdrop-filter: blur(4px); transition: background 0.15s;
+  }
+  .sound-btn:hover { background: rgba(255,255,255,0.1); }
+
+  #confetti { position: fixed; inset: 0; z-index: 40; pointer-events: none; overflow: hidden; }
+  .confetti-piece { position: absolute; top: -20px; }
+  @keyframes confetti-fall {
+    0% { transform: translate(0, -10%) rotate(0deg); opacity: 1; }
+    100% { transform: translate(var(--drift), 105vh) rotate(var(--rotate)); opacity: 0; }
+  }
+  @keyframes confetti-burst {
+    0% { transform: translate(0,0) rotate(0deg) scale(1); opacity: 1; }
+    100% { transform: translate(var(--bx), var(--by)) rotate(var(--rotate)) scale(0.3); opacity: 0; }
+  }
+
+  #sparkles { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .sparkle {
+    position: absolute; border-radius: 50%; background: rgba(255,255,255,0.8);
+    animation: sparkle 4s ease-in-out infinite;
+  }
+  @keyframes sparkle {
+    0%, 100% { opacity: 0.15; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+  }
+
+  .win-flash {
+    position: fixed; inset: 0; z-index: 35; pointer-events: none; opacity: 0;
+    background: radial-gradient(circle at 50% 40%, rgba(255,255,255,0.55) 0%, rgba(168,85,247,0.2) 35%, transparent 70%);
+  }
+  .win-flash.on { animation: win-flash 0.7s ease-out forwards; }
+  @keyframes win-flash {
+    0% { opacity: 0.95; }
+    100% { opacity: 0; }
+  }
+</style>
+</head>
+<body>
+  <button class="sound-btn" id="soundBtn" title="Выключить звук" aria-label="Звук">🔊</button>
+  <div id="sparkles"></div>
+  <div id="winFlash" class="win-flash"></div>
+  <div id="confetti"></div>
+
+  <div class="wrap">
+    <div class="glow1"></div>
+    <div class="glow2"></div>
+
+    <header>
+      <p class="eyebrow">Нейрофотосессия</p>
+      <h1>Колесо удачи</h1>
+      <p class="lead">Крутите колесо и получите подарок, скидку или бонус к вашей AI-фотосессии. Один клик — и ваш персональный приз уже ждёт.</p>
+    </header>
+
+    <div class="stage">
+      <div class="wheel-col">
+        <div class="wheel-box" id="wheelBox">
+          <div class="lights" id="lights"></div>
+          <div class="pointer" id="pointer"></div>
+          <div class="ring">
+            <div class="ring-inner">
+              <div class="wheel" id="wheel">
+                <div class="highlight" id="highlight"></div>
+                <!-- подписи добавляются скриптом -->
+              </div>
+            </div>
+          </div>
+          <button class="center-btn" id="centerBtn" aria-label="Крутить колесо">GO</button>
+        </div>
+        <button class="spin-btn" id="spinBtn">Крутить колесо</button>
+      </div>
+
+      <div class="result hidden" id="resultCard">
+        <span class="badge" id="badge">Ваш приз</span>
+        <h2 id="resTitle"></h2>
+        <p id="resDesc"></p>
+        <span class="promo-label">Ваш промокод</span>
+        <div class="promo-row">
+          <div class="promo-code" id="promoCode"></div>
+          <button class="copy-btn" id="copyBtn">Копировать</button>
+        </div>
+        <div class="timer" id="timer"></div>
+        <div class="actions actions-main">
+          <button class="cta" id="ctaBtn"></button>
+          <div class="actions-row">
+            <button type="button" class="share-btn" id="shareBtn" aria-label="Поделиться результатом">
+              <span aria-hidden>↗</span> Поделиться
+            </button>
+            <button class="again" id="againBtn">Крутить ещё раз</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function () {
+  "use strict";
+
+  var PRIZES = [
+    { id:"discount", label:"Скидка 15%", title:"Скидка 15%",
+      description:"Получите скидку на первую нейрофотосессию и создайте образы, которые продают вас без слов.",
+      cta:"Получить скидку", color:"#7c3aed", textColor:"#ffffff", codePrefix:"NEURO15" },
+    { id:"bonus", label:"Бонусный образ", title:"Бонусный образ",
+      description:"Добавим один дополнительный AI-образ к вашей фотосессии.",
+      cta:"Получить бонус", color:"#db2777", textColor:"#ffffff", codePrefix:"BONUS" },
+    { id:"gift", label:"Подарок", title:"Подарок",
+      description:"Мини-гайд по подготовке к нейрофотосессии в подарок.",
+      cta:"Забрать подарок", color:"#0891b2", textColor:"#ffffff", codePrefix:"GIFT" },
+    { id:"idea", label:"Идея образа", title:"Идея образа",
+      description:"Получите персональную идею образа для вашего бренда или соцсетей.",
+      cta:"Получить идею", color:"#ca8a04", textColor:"#1a1030", codePrefix:"IDEA" },
+    { id:"special", label:"Спецпредложение", title:"Спецпредложение",
+      description:"Пакет «Личный бренд» на особых условиях только сегодня.",
+      cta:"Записаться на нейрофотосессию", color:"#059669", textColor:"#ffffff", codePrefix:"BRAND" },
+    { id:"material", label:"Полезный материал", title:"Полезный материал",
+      description:"Чек-лист: как выбрать стиль для нейрофотосессии.",
+      cta:"Скачать чек-лист", color:"#6366f1", textColor:"#ffffff", codePrefix:"CHECK" }
+  ];
+  var N = PRIZES.length;
+  var SECTOR = 360 / N;
+  var SPIN_MS = 4500;
+  var DEADLINE_SEC = 15 * 60;
+  /** Ссылка на лендинг в тексте «Поделиться» (оставьте пустым — подставится текущий URL) */
+  var SHARE_PAGE_URL = "";
+
+  // ----- DOM -----
+  var wheel = document.getElementById("wheel");
+  var highlight = document.getElementById("highlight");
+  var centerBtn = document.getElementById("centerBtn");
+  var spinBtn = document.getElementById("spinBtn");
+  var resultCard = document.getElementById("resultCard");
+  var badge = document.getElementById("badge");
+  var resTitle = document.getElementById("resTitle");
+  var resDesc = document.getElementById("resDesc");
+  var promoCodeEl = document.getElementById("promoCode");
+  var copyBtn = document.getElementById("copyBtn");
+  var timerEl = document.getElementById("timer");
+  var ctaBtn = document.getElementById("ctaBtn");
+  var againBtn = document.getElementById("againBtn");
+  var shareBtn = document.getElementById("shareBtn");
+  var soundBtn = document.getElementById("soundBtn");
+  var confettiBox = document.getElementById("confetti");
+  var wheelBox = document.getElementById("wheelBox");
+  var pointer = document.getElementById("pointer");
+  var lightsBox = document.getElementById("lights");
+  var winFlash = document.getElementById("winFlash");
+  var sparklesBox = document.getElementById("sparkles");
+
+  function splitLabel(label) {
+    var map = {
+      "Бонусный образ": ["Бонусный", "образ"],
+      "Спецпредложение": ["Спец-", "предложение"],
+      "Полезный материал": ["Полезный", "материал"],
+      "Идея образа": ["Идея", "образа"]
+    };
+    if (map[label]) return map[label];
+    if (label.length <= 14) return [label];
+    var parts = label.split(" ");
+    return parts.length > 1 ? parts : [label];
+  }
+
+  function buildSparkles() {
+    for (var s = 0; s < 40; s++) {
+      var el = document.createElement("span");
+      el.className = "sparkle";
+      el.style.left = (Math.random() * 100) + "%";
+      el.style.top = (Math.random() * 100) + "%";
+      el.style.width = el.style.height = (2 + Math.random() * 3) + "px";
+      el.style.animationDelay = (Math.random() * 5) + "s";
+      el.style.animationDuration = (3 + Math.random() * 4) + "s";
+      sparklesBox.appendChild(el);
+    }
+  }
+
+  function buildLights() {
+    var count = 20;
+    for (var b = 0; b < count; b++) {
+      var angle = (360 / count) * b - 90;
+      var rad = (angle * Math.PI) / 180;
+      var bulb = document.createElement("span");
+      bulb.className = "bulb";
+      bulb.style.left = (50 + 48 * Math.cos(rad)) + "%";
+      bulb.style.top = (50 + 48 * Math.sin(rad)) + "%";
+      bulb.style.animationDelay = (b / count * 0.6) + "s";
+      if (wheelBox.classList.contains("spinning")) {
+        bulb.style.background = "hsl(" + ((b * 18) % 360) + ", 90%, 70%)";
+        bulb.style.boxShadow = "0 0 10px hsl(" + ((b * 18) % 360) + ", 90%, 60%)";
+      }
+      lightsBox.appendChild(bulb);
+    }
+  }
+
+  function updateLightsSpinning(spinning) {
+    var bulbs = lightsBox.querySelectorAll(".bulb");
+    for (var i = 0; i < bulbs.length; i++) {
+      if (spinning) {
+        bulbs[i].style.background = "hsl(" + ((i * 18) % 360) + ", 90%, 70%)";
+        bulbs[i].style.boxShadow = "0 0 10px hsl(" + ((i * 18) % 360) + ", 90%, 60%)";
+      } else {
+        bulbs[i].style.background = "rgba(255,255,255,0.85)";
+        bulbs[i].style.boxShadow = "0 0 6px rgba(255,255,255,0.6)";
+      }
+    }
+  }
+
+  function triggerWowWin() {
+    winFlash.classList.add("on");
+    setTimeout(function(){ winFlash.classList.remove("on"); }, 700);
+    document.body.classList.add("wow-shake");
+    setTimeout(function(){ document.body.classList.remove("wow-shake"); }, 500);
+    pointer.classList.remove("bounce");
+    void pointer.offsetWidth;
+    pointer.classList.add("bounce");
+    if (navigator.vibrate) navigator.vibrate([80, 40, 120]);
+  }
+
+  // ----- Колесо: фон и подписи (SVG) -----
+  function buildWheel() {
+    var stops = [];
+    for (var i = 0; i < N; i++) {
+      stops.push(PRIZES[i].color + " " + (i*SECTOR) + "deg " + ((i+1)*SECTOR) + "deg");
+    }
+    wheel.style.background = "conic-gradient(from -90deg, " + stops.join(", ") + ")";
+
+    var svgNS = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("class", "wheel-labels");
+    svg.setAttribute("viewBox", "0 0 200 200");
+    svg.setAttribute("aria-hidden", "true");
+
+    var cx = 100, cy = 100, radius = 62;
+    for (var j = 0; j < N; j++) {
+      var midDeg = j * SECTOR + SECTOR / 2 - 90;
+      var rad = (midDeg * Math.PI) / 180;
+      var x = cx + radius * Math.cos(rad);
+      var y = cy + radius * Math.sin(rad);
+      var textRotate = midDeg + 90;
+      var lines = splitLabel(PRIZES[j].label);
+
+      var text = document.createElementNS(svgNS, "text");
+      text.setAttribute("x", String(x));
+      text.setAttribute("y", String(y));
+      text.setAttribute("fill", PRIZES[j].textColor);
+      text.setAttribute("text-anchor", "middle");
+      text.setAttribute("dominant-baseline", "middle");
+      text.setAttribute("transform", "rotate(" + textRotate + " " + x + " " + y + ")");
+
+      if (lines.length === 1) {
+        text.textContent = lines[0];
+      } else {
+        for (var k = 0; k < lines.length; k++) {
+          var tspan = document.createElementNS(svgNS, "tspan");
+          tspan.setAttribute("x", String(x));
+          tspan.setAttribute("dy", k === 0 ? "-0.45em" : "1em");
+          tspan.textContent = lines[k];
+          text.appendChild(tspan);
+        }
+      }
+      svg.appendChild(text);
+    }
+    wheel.appendChild(svg);
+  }
+
+  function highlightGradient(index) {
+    var start = index*SECTOR, end = (index+1)*SECTOR;
+    return "conic-gradient(from -90deg, transparent 0deg " + start + "deg, rgba(255,255,255,0.45) "
+      + start + "deg " + end + "deg, transparent " + end + "deg 360deg)";
+  }
+
+  // ----- Состояние -----
+  var rotation = 0;
+  var isSpinning = false;
+  var spinCount = 0;
+  var timerInterval = null;
+  var copyTimeout = null;
+
+  function rotationForSector(index) {
+    return 360 - (index*SECTOR + SECTOR/2);
+  }
+
+  function buildShareText(prizeTitle, promoCode) {
+    var url = SHARE_PAGE_URL || window.location.href.split("#")[0].split("?")[0];
+    return "🎁 Я выиграл(а) «" + prizeTitle + "» в колесе удачи нейрофотосессии!\n\n"
+      + "Промокод: " + promoCode + "\n\n"
+      + "Крути и ты: " + url;
+  }
+
+  function shareResult() {
+    var title = resTitle.textContent;
+    var code = promoCodeEl.textContent;
+    var text = buildShareText(title, code);
+    var url = SHARE_PAGE_URL || window.location.href.split("#")[0].split("?")[0];
+
+    function setShareLabel(msg) {
+      shareBtn.innerHTML = "<span aria-hidden>↗</span> " + msg;
+      setTimeout(function(){ shareBtn.innerHTML = "<span aria-hidden>↗</span> Поделиться"; }, 2000);
+    }
+
+    if (navigator.share) {
+      navigator.share({
+        title: "Колесо удачи — нейрофотосессия",
+        text: text,
+        url: url
+      }).then(function(){ setShareLabel("Отправлено!"); }).catch(function(e){
+        if (e && e.name === "AbortError") return;
+        fallbackCopy();
+      });
+      return;
+    }
+    fallbackCopy();
+
+    function fallbackCopy() {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function(){ setShareLabel("Текст скопирован!"); }).catch(manualCopy);
+      } else manualCopy();
+      function manualCopy() {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); setShareLabel("Текст скопирован!"); }
+        catch (e) { setShareLabel("Не удалось"); }
+        document.body.removeChild(ta);
+      }
+    }
+  }
+
+  function genCode(prefix) {
+    var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", s = "";
+    for (var i = 0; i < 4; i++) s += chars.charAt(Math.floor(Math.random()*chars.length));
+    return prefix + "-" + s;
+  }
+
+  // ----- Звук (Web Audio) -----
+  var audioCtx = null, muted = false, tickTimer = null;
+  function ctx() {
+    if (audioCtx) return audioCtx;
+    var C = window.AudioContext || window.webkitAudioContext;
+    if (!C) return null;
+    audioCtx = new C();
+    return audioCtx;
+  }
+  function tone(freq, dur, type, gain, offset) {
+    var c = ctx(); if (!c || muted) return;
+    var now = c.currentTime + (offset || 0);
+    var osc = c.createOscillator(), env = c.createGain();
+    osc.type = type || "sine"; osc.frequency.value = freq;
+    env.gain.setValueAtTime(0.0001, now);
+    env.gain.exponentialRampToValueAtTime(gain || 0.2, now + 0.01);
+    env.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+    osc.connect(env).connect(c.destination);
+    osc.start(now); osc.stop(now + dur + 0.02);
+  }
+  function stopTicks() { if (tickTimer) { clearTimeout(tickTimer); tickTimer = null; } }
+  function startTicks() {
+    var c = ctx(); if (c && c.state === "suspended") c.resume();
+    stopTicks();
+    var start = performance.now(), minI = 45, maxI = 260;
+    function next() {
+      var p = Math.min((performance.now()-start)/SPIN_MS, 1);
+      if (p >= 1) { stopTicks(); return; }
+      tone(1100, 0.04, "square", 0.08);
+      tickTimer = setTimeout(next, minI + (maxI-minI)*p*p);
+    }
+    next();
+  }
+  function playWin() {
+    var c = ctx(); if (c && c.state === "suspended") c.resume();
+    [523.25, 659.25, 783.99, 1046.5].forEach(function(f, i){ tone(f, 0.35, "triangle", 0.22, i*0.09); });
+  }
+  soundBtn.addEventListener("click", function(){
+    muted = !muted;
+    if (muted) stopTicks();
+    soundBtn.textContent = muted ? "🔇" : "🔊";
+    soundBtn.title = muted ? "Включить звук" : "Выключить звук";
+  });
+
+  // ----- Конфетти -----
+  var COLORS = ["#f472b6","#a855f7","#22d3ee","#facc15","#34d399","#818cf8"];
+  function launchConfetti() {
+    confettiBox.innerHTML = "";
+    for (var i = 0; i < 120; i++) {
+      var p = document.createElement("span");
+      p.className = "confetti-piece";
+      var size = 5 + Math.random()*9;
+      var round = Math.random() > 0.5;
+      p.style.left = (Math.random()*100) + "%";
+      p.style.width = size + "px";
+      p.style.height = (round ? size : size*0.4) + "px";
+      p.style.borderRadius = round ? "50%" : "2px";
+      p.style.background = COLORS[i % COLORS.length];
+      p.style.setProperty("--drift", ((Math.random()-0.5)*200) + "px");
+      p.style.setProperty("--rotate", (Math.random()*720) + "deg");
+      var dur = 2.2 + Math.random()*2, delay = Math.random()*0.6;
+      p.style.animation = "confetti-fall " + dur + "s linear " + delay + "s forwards";
+      confettiBox.appendChild(p);
+    }
+    for (var j = 0; j < 50; j++) {
+      var b = document.createElement("span");
+      b.className = "confetti-piece";
+      var angle = Math.random() * Math.PI * 2;
+      var dist = 80 + Math.random() * 220;
+      var size2 = 4 + Math.random() * 8;
+      var round2 = Math.random() > 0.4;
+      b.style.left = "50%";
+      b.style.top = "42%";
+      b.style.width = size2 + "px";
+      b.style.height = (round2 ? size2 : size2*0.4) + "px";
+      b.style.borderRadius = round2 ? "50%" : "2px";
+      b.style.background = COLORS[j % COLORS.length];
+      b.style.setProperty("--bx", (Math.cos(angle)*dist) + "px");
+      b.style.setProperty("--by", (Math.sin(angle)*dist) + "px");
+      b.style.setProperty("--rotate", (Math.random()*540) + "deg");
+      b.style.animation = "confetti-burst 1.8s ease-out " + (Math.random()*0.15) + "s forwards";
+      confettiBox.appendChild(b);
+    }
+    setTimeout(function(){ confettiBox.innerHTML = ""; }, 5500);
+  }
+
+  // ----- Таймер -----
+  function fmt(t) {
+    var m = Math.floor(t/60), s = t % 60;
+    return ("0"+m).slice(-2) + ":" + ("0"+s).slice(-2);
+  }
+  function startTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+    var left = DEADLINE_SEC;
+    render();
+    timerInterval = setInterval(function(){
+      left = left > 0 ? left - 1 : 0;
+      render();
+      if (left === 0) clearInterval(timerInterval);
+    }, 1000);
+    function render() {
+      if (left <= 0) {
+        timerEl.classList.add("expired");
+        timerEl.innerHTML = "Время вышло — крутите ещё раз, чтобы получить новый приз.";
+        ctaBtn.disabled = true;
+      } else {
+        timerEl.classList.remove("expired");
+        timerEl.innerHTML = "Приз сгорит через <b>" + fmt(left) + "</b>";
+        ctaBtn.disabled = false;
+      }
+    }
+  }
+
+  // ----- Показ результата -----
+  function showResult(prize) {
+    badge.style.background = prize.color;
+    resTitle.textContent = prize.title;
+    resDesc.textContent = prize.description;
+    promoCodeEl.textContent = genCode(prize.codePrefix);
+    ctaBtn.textContent = prize.cta;
+    copyBtn.textContent = "Копировать";
+    resultCard.classList.remove("hidden");
+    spinBtn.classList.add("hidden");
+    startTimer();
+    launchConfetti();
+    playWin();
+    triggerWowWin();
+  }
+
+  // ----- Вращение -----
+  function spin() {
+    if (isSpinning) return;
+    isSpinning = true;
+    spinCount++;
+    spinBtn.disabled = true;
+    centerBtn.disabled = true;
+    spinBtn.textContent = "Колесо крутится…";
+    highlight.classList.remove("on");
+    wheelBox.classList.add("spinning");
+    updateLightsSpinning(true);
+    startTicks();
+
+    var index = Math.floor(Math.random()*N);
+    var target = rotationForSector(index);
+    var current = rotation % 360;
+    var extra = (5 + Math.floor(Math.random()*4)) * 360;
+    var delta = target - current;
+    if (delta <= 0) delta += 360;
+    rotation = rotation + extra + delta;
+
+    wheel.classList.add("spinning");
+    wheel.style.transform = "rotate(" + rotation + "deg)";
+
+    setTimeout(function(){
+      isSpinning = false;
+      stopTicks();
+      wheelBox.classList.remove("spinning");
+      updateLightsSpinning(false);
+      highlight.style.background = highlightGradient(index);
+      highlight.classList.add("on");
+      showResult(PRIZES[index]);
+    }, SPIN_MS);
+  }
+
+  function reset() {
+    if (isSpinning) return;
+    if (timerInterval) clearInterval(timerInterval);
+    resultCard.classList.add("hidden");
+    highlight.classList.remove("on");
+    spinBtn.classList.remove("hidden");
+    spinBtn.disabled = false;
+    centerBtn.disabled = false;
+    spinBtn.textContent = "Крутить колесо";
+  }
+
+  // ----- События -----
+  spinBtn.addEventListener("click", spin);
+  centerBtn.addEventListener("click", spin);
+  againBtn.addEventListener("click", reset);
+  shareBtn.addEventListener("click", shareResult);
+  copyBtn.addEventListener("click", function(){
+    var code = promoCodeEl.textContent;
+    function done(){ copyBtn.textContent = "Скопировано"; if (copyTimeout) clearTimeout(copyTimeout); copyTimeout = setTimeout(function(){ copyBtn.textContent = "Копировать"; }, 1800); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).then(done).catch(fallback);
+    } else fallback();
+    function fallback(){
+      var ta = document.createElement("textarea"); ta.value = code; document.body.appendChild(ta);
+      ta.select(); try { document.execCommand("copy"); done(); } catch(e){}
+      document.body.removeChild(ta);
+    }
+  });
+  ctaBtn.addEventListener("click", function(){
+    // TODO: подключите свой переход (Telegram / WhatsApp / форма)
+    alert("Приз: " + resTitle.textContent + "\nПромокод: " + promoCodeEl.textContent);
+  });
+
+  buildSparkles();
+  buildLights();
+  buildWheel();
+})();
+</script>
+</body>
+</html>
