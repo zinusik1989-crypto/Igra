@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import { PRIZES, SECTOR_ANGLE, type Prize } from "./prizes";
+import { PRIZES, SECTOR_ANGLE, generatePromoCode, type Prize } from "./prizes";
 
 const SPIN_DURATION_MS = 4500;
 const MIN_FULL_ROTATIONS = 5;
@@ -15,12 +15,21 @@ function pickRandomIndex(): number {
   return Math.floor(Math.random() * PRIZES.length);
 }
 
-export function useWheelSpin() {
+type SpinCallbacks = {
+  onStart?: () => void;
+  onFinish?: (prize: Prize) => void;
+};
+
+export function useWheelSpin(callbacks: SpinCallbacks = {}) {
   const [rotation, setRotation] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
   const [result, setResult] = useState<Prize | null>(null);
+  const [winningIndex, setWinningIndex] = useState<number | null>(null);
+  const [promoCode, setPromoCode] = useState<string>("");
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rotationRef = useRef(0);
+  const callbacksRef = useRef(callbacks);
+  callbacksRef.current = callbacks;
 
   const clearSpinTimeout = useCallback(() => {
     if (timeoutRef.current) {
@@ -34,7 +43,9 @@ export function useWheelSpin() {
 
     clearSpinTimeout();
     setResult(null);
+    setWinningIndex(null);
     setIsSpinning(true);
+    callbacksRef.current.onStart?.();
 
     const index = pickRandomIndex();
     const prize = PRIZES[index];
@@ -55,6 +66,9 @@ export function useWheelSpin() {
     timeoutRef.current = setTimeout(() => {
       setIsSpinning(false);
       setResult(prize);
+      setWinningIndex(index);
+      setPromoCode(generatePromoCode(prize.codePrefix));
+      callbacksRef.current.onFinish?.(prize);
       timeoutRef.current = null;
     }, SPIN_DURATION_MS);
   }, [isSpinning, clearSpinTimeout]);
@@ -62,6 +76,8 @@ export function useWheelSpin() {
   const reset = useCallback(() => {
     clearSpinTimeout();
     setResult(null);
+    setWinningIndex(null);
+    setPromoCode("");
     setIsSpinning(false);
   }, [clearSpinTimeout]);
 
@@ -69,6 +85,8 @@ export function useWheelSpin() {
     rotation,
     isSpinning,
     result,
+    winningIndex,
+    promoCode,
     spin,
     reset,
     spinDurationMs: SPIN_DURATION_MS,

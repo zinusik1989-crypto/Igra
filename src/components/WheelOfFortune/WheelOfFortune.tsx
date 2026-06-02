@@ -1,18 +1,36 @@
+import { useRef } from "react";
 import { Wheel } from "./Wheel";
 import { ResultCard } from "./ResultCard";
+import { Confetti } from "./Confetti";
 import { useWheelSpin } from "./useWheelSpin";
+import { useSound } from "./useSound";
 
 type WheelOfFortuneProps = {
-  onCtaClick?: (prizeId: string) => void;
+  onCtaClick?: (prizeId: string, promoCode: string) => void;
   className?: string;
 };
 
+const SPIN_DURATION_MS = 4500;
+
 export function WheelOfFortune({ onCtaClick, className = "" }: WheelOfFortuneProps) {
-  const { rotation, isSpinning, result, spin, reset } = useWheelSpin();
+  const { muted, toggleMute, startSpinSound, stopSpinSound, playWin } = useSound();
+  const spinCountRef = useRef(0);
+
+  const { rotation, isSpinning, result, winningIndex, promoCode, spin, reset } =
+    useWheelSpin({
+      onStart: () => {
+        spinCountRef.current += 1;
+        startSpinSound(SPIN_DURATION_MS);
+      },
+      onFinish: () => {
+        stopSpinSound();
+        playWin();
+      },
+    });
 
   const handleCta = () => {
     if (result) {
-      onCtaClick?.(result.id);
+      onCtaClick?.(result.id, promoCode);
     }
   };
 
@@ -30,6 +48,20 @@ export function WheelOfFortune({ onCtaClick, className = "" }: WheelOfFortunePro
         className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full bg-pink-500/15 blur-[80px]"
         aria-hidden
       />
+
+      {/* Конфетти при выигрыше */}
+      {result && !isSpinning && <Confetti seed={spinCountRef.current} />}
+
+      {/* Кнопка звука */}
+      <button
+        type="button"
+        onClick={toggleMute}
+        className="absolute right-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-lg text-white/80 backdrop-blur transition hover:bg-white/10 sm:right-6 sm:top-6"
+        aria-label={muted ? "Включить звук" : "Выключить звук"}
+        title={muted ? "Включить звук" : "Выключить звук"}
+      >
+        {muted ? "🔇" : "🔊"}
+      </button>
 
       <div className="relative mx-auto max-w-4xl">
         {/* Заголовок */}
@@ -54,6 +86,7 @@ export function WheelOfFortune({ onCtaClick, className = "" }: WheelOfFortunePro
               isSpinning={isSpinning}
               onSpin={spin}
               disabled={isSpinning || !!result}
+              winningIndex={winningIndex}
             />
 
             {!result && (
@@ -73,6 +106,7 @@ export function WheelOfFortune({ onCtaClick, className = "" }: WheelOfFortunePro
             <div className="flex w-full max-w-md flex-col items-center lg:items-stretch lg:pt-8">
               <ResultCard
                 prize={result}
+                promoCode={promoCode}
                 onCta={handleCta}
                 onSpinAgain={reset}
               />

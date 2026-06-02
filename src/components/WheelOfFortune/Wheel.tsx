@@ -5,6 +5,7 @@ type WheelProps = {
   isSpinning: boolean;
   onSpin: () => void;
   disabled: boolean;
+  winningIndex: number | null;
 };
 
 function buildConicGradient(): string {
@@ -16,7 +17,20 @@ function buildConicGradient(): string {
   return `conic-gradient(from -90deg, ${stops.join(", ")})`;
 }
 
-export function Wheel({ rotation, isSpinning, onSpin, disabled }: WheelProps) {
+/** Полупрозрачная белая «подсветка» только на выпавшем секторе */
+function buildHighlightGradient(index: number): string {
+  const start = index * SECTOR_ANGLE;
+  const end = (index + 1) * SECTOR_ANGLE;
+  return `conic-gradient(from -90deg, transparent 0deg ${start}deg, rgba(255,255,255,0.45) ${start}deg ${end}deg, transparent ${end}deg 360deg)`;
+}
+
+export function Wheel({
+  rotation,
+  isSpinning,
+  onSpin,
+  disabled,
+  winningIndex,
+}: WheelProps) {
   const transitionDuration = isSpinning ? "4.5s" : "0s";
   const transitionTiming = isSpinning
     ? "cubic-bezier(0.17, 0.67, 0.12, 0.99)"
@@ -44,6 +58,15 @@ export function Wheel({ rotation, isSpinning, onSpin, disabled }: WheelProps) {
               transition: `transform ${transitionDuration} ${transitionTiming}`,
             }}
           >
+            {/* Подсветка выпавшего сектора */}
+            {winningIndex !== null && !isSpinning && (
+              <div
+                className="pointer-events-none absolute inset-0 animate-[pulse_1.1s_ease-in-out_infinite] rounded-full"
+                style={{ background: buildHighlightGradient(winningIndex) }}
+                aria-hidden
+              />
+            )}
+
             {/* Подписи секторов */}
             {PRIZES.map((prize, index) => {
               const angle = index * SECTOR_ANGLE + SECTOR_ANGLE / 2 - 90;

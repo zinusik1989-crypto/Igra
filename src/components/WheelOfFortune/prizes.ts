@@ -6,6 +6,8 @@ export type Prize = {
   cta: string;
   color: string;
   textColor: string;
+  /** Префикс промокода, например NEURO15 -> NEURO15-AB7K */
+  codePrefix: string;
 };
 
 export const PRIZES: Prize[] = [
@@ -18,6 +20,7 @@ export const PRIZES: Prize[] = [
     cta: "Получить скидку",
     color: "#7c3aed",
     textColor: "#ffffff",
+    codePrefix: "NEURO15",
   },
   {
     id: "bonus",
@@ -28,6 +31,7 @@ export const PRIZES: Prize[] = [
     cta: "Получить бонус",
     color: "#db2777",
     textColor: "#ffffff",
+    codePrefix: "BONUS",
   },
   {
     id: "gift",
@@ -38,6 +42,7 @@ export const PRIZES: Prize[] = [
     cta: "Забрать подарок",
     color: "#0891b2",
     textColor: "#ffffff",
+    codePrefix: "GIFT",
   },
   {
     id: "idea",
@@ -48,6 +53,7 @@ export const PRIZES: Prize[] = [
     cta: "Получить идею",
     color: "#ca8a04",
     textColor: "#1a1030",
+    codePrefix: "IDEA",
   },
   {
     id: "special",
@@ -58,6 +64,7 @@ export const PRIZES: Prize[] = [
     cta: "Записаться на нейрофотосессию",
     color: "#059669",
     textColor: "#ffffff",
+    codePrefix: "BRAND",
   },
   {
     id: "material",
@@ -68,8 +75,19 @@ export const PRIZES: Prize[] = [
     cta: "Скачать чек-лист",
     color: "#6366f1",
     textColor: "#ffffff",
+    codePrefix: "CHECK",
   },
 ];
 
 export const SECTOR_COUNT = PRIZES.length;
 export const SECTOR_ANGLE = 360 / SECTOR_COUNT;
+
+/** Генерирует промокод вида PREFIX-AB7K */
+export function generatePromoCode(prefix: string): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let suffix = "";
+  for (let i = 0; i < 4; i++) {
+    suffix += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return `${prefix}-${suffix}`;
+}
